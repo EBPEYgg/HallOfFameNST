@@ -9,33 +9,52 @@ namespace HallOfFameNST.Controllers
     [Route("api/v1/[controller]")]
     public class PersonController : Controller
     {
+        private readonly ILogger<PersonController> _logger;
+
         private readonly HallOfFameNSTContext _context;
 
-        public PersonController(HallOfFameNSTContext context)
+        public PersonController(HallOfFameNSTContext context, 
+                                ILogger<PersonController> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         // GET: /api/v1/persons
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Person>>> GetPersons()
         {
-            return await _context.Person.Include(p => p.Skills).ToListAsync();
+            _logger.LogInformation("Starting GetPersons endpoint");
+            try
+            {
+                var persons = await _context.Person.Include(p => p.Skills).ToListAsync();
+                _logger.LogInformation("Successfully retrieved {Count} persons", persons.Count);
+                return persons;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Failed to get a list of persons. Error: {ex.Message}");
+                throw;
+            }
         }
 
         // GET: api/v1/persons/{id}
         [HttpGet("{id}")]
         public async Task<ActionResult<Person>> GetPerson(long id)
         {
+            _logger.LogInformation("Starting GetPerson endpoint for id={Id}", id);
+
             var person = await _context.Person
                 .Include(p => p.Skills)
                 .FirstOrDefaultAsync(p => p.Id == id);
 
             if (person == null)
             {
+                _logger.LogWarning("Person with id={id} not found", id);
                 return NotFound();
             }
 
+            _logger.LogInformation("Successfully retrieved person with id={Id}", id);
             return person;
         }
 
@@ -43,11 +62,19 @@ namespace HallOfFameNST.Controllers
         [HttpPost]
         public async Task<ActionResult<Person>> CreatePerson(Person person)
         {
-            if (ModelState.IsValid)
+            _logger.LogInformation("Starting CreatePerson endpoint");
+
+            if (!ModelState.IsValid)
             {
-                _context.Person.Add(person);
-                await _context.SaveChangesAsync();
+                _logger.LogWarning("Invalid model state while creating a person with id={id}. Errors: {Errors}", 
+                                    person.Id, ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage));
+                return BadRequest(ModelState);
             }
+
+            _context.Person.Add(person);
+            await _context.SaveChangesAsync();
+
+            _logger.LogInformation("Successful created a person with id={id}", person.Id);
             return CreatedAtAction(nameof(GetPerson), new { id = person.Id }, person);
         }
 
@@ -55,29 +82,62 @@ namespace HallOfFameNST.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdatePerson(long id, Person person)
         {
-            if (id != person.Id)
+            _logger.LogInformation("Starting UpdatePerson endpoint for id={Id}", id);
+
+            if (!ModelState.IsValid)
             {
+                _logger.LogWarning("Invalid model state while updating person with id={Id}. Errors: {Errors}", 
+                                    id, ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage));
+                return BadRequest(ModelState);
+            }
+
+            var existingPerson = await _context.Person
+                .Include(p => p.Skills)
+                .FirstOrDefaultAsync(p => p.Id == id);
+
+            if (existingPerson == null)
+            {
+                _logger.LogWarning("Person with id={id} not found", id);
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            _logger.LogInformation("Updating details for person with id={Id}", id);
+            existingPerson.Name = person.Name;
+            existingPerson.DisplayName = person.DisplayName;
+            var existingSkills = existingPerson.Skills.ToList();
+
+            foreach (var newSkill in person.Skills)
             {
-                var existingPerson = await _context.Person
-                    .Include(p => p.Skills)
-                    .FirstOrDefaultAsync(p => p.Id == id);
-
-                if (existingPerson == null)
+                var matchingSkill = existingSkills.FirstOrDefault(s => s.Name == newSkill.Name);
+                // Если навык совпадает, обновляем уровень
+                if (matchingSkill != null)
                 {
-                    return NotFound();
+                    _logger.LogInformation("Updating skill '{Skill}' for person with id={Id}", 
+                                            newSkill.Name, id);
+                    matchingSkill.Level = newSkill.Level;
                 }
-
-                existingPerson.Name = person.Name;
-                existingPerson.DisplayName = person.DisplayName;
-                existingPerson.Skills = person.Skills;
-
-                //_context.Update(person);
-                await _context.SaveChangesAsync();
+                // Если навык новый, добавляем его
+                else
+                {
+                    _logger.LogInformation("Adding new skill '{Skill}' for person with id={Id}", 
+                                            newSkill.Name, id);
+                    existingPerson.Skills.Add(newSkill);
+                }
             }
+
+            // Удаление навыков, которых больше нет в новом списке
+            foreach (var existingSkill in existingSkills)
+            {
+                if (!person.Skills.Any(s => s.Name == existingSkill.Name))
+                {
+                    _logger.LogInformation("Deleting skill '{Skill}' for person with id={Id}", 
+                                            existingSkill.Name, id);
+                    _context.Skills.Remove(existingSkill);
+                }
+            }
+
+            await _context.SaveChangesAsync();
+            _logger.LogInformation("Successfully updated person with id={Id}", id);
             return NoContent();
         }
 
@@ -85,15 +145,19 @@ namespace HallOfFameNST.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeletePerson(long id)
         {
-            var person = await _context.Person.FindAsync(id);
+            _logger.LogInformation("Starting DeletePerson endpoint for id={Id}", id);
+            var person = await _context.Person.FirstOrDefaultAsync(p => p.Id == id);
 
             if (person == null)
             {
+                _logger.LogWarning("Person with id={Id} not found for deletion", id);
                 return NotFound();
             }
 
             _context.Person.Remove(person);
             await _context.SaveChangesAsync();
+
+            _logger.LogInformation("Successfully deleted person with id={Id}", id);
             return NoContent();
         }
     }
