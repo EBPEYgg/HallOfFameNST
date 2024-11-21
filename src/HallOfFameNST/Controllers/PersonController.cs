@@ -30,7 +30,7 @@ namespace HallOfFameNST.Controllers
                 var persons = await _context.Person.Include(p => p.Skills).ToListAsync();
                 _logger.LogInformation("Successfully retrieved {Count} persons", persons.Count);
                 return persons;
-        }
+            }
             catch (Exception ex)
             {
                 _logger.LogError($"Failed to get a list of persons. Error: {ex.Message}");
@@ -71,8 +71,8 @@ namespace HallOfFameNST.Controllers
                 return BadRequest(ModelState);
             }
 
-                _context.Person.Add(person);
-                await _context.SaveChangesAsync();
+            _context.Person.Add(person);
+            await _context.SaveChangesAsync();
 
             _logger.LogInformation("Successful created a person with id={id}", person.Id);
             return CreatedAtAction(nameof(GetPerson), new { id = person.Id }, person);
@@ -91,25 +91,52 @@ namespace HallOfFameNST.Controllers
                 return BadRequest(ModelState);
             }
 
-            if (ModelState.IsValid)
-            {
-                var existingPerson = await _context.Person
-                    .Include(p => p.Skills)
-                    .FirstOrDefaultAsync(p => p.Id == id);
+            var existingPerson = await _context.Person
+                .Include(p => p.Skills)
+                .FirstOrDefaultAsync(p => p.Id == id);
 
-                if (existingPerson == null)
-                {
+            if (existingPerson == null)
+            {
                 _logger.LogWarning("Person with id={id} not found", id);
-                    return NotFound();
-                }
+                return NotFound();
+            }
 
             _logger.LogInformation("Updating details for person with id={Id}", id);
-                existingPerson.Name = person.Name;
-                existingPerson.DisplayName = person.DisplayName;
-                existingPerson.Skills = person.Skills;
+            existingPerson.Name = person.Name;
+            existingPerson.DisplayName = person.DisplayName;
+            var existingSkills = existingPerson.Skills.ToList();
 
-                //_context.Update(person);
-                await _context.SaveChangesAsync();
+            foreach (var newSkill in person.Skills)
+            {
+                var matchingSkill = existingSkills.FirstOrDefault(s => s.Name == newSkill.Name);
+                // Если навык совпадает, обновляем уровень
+                if (matchingSkill != null)
+                {
+                    _logger.LogInformation("Updating skill '{Skill}' for person with id={Id}", 
+                                            newSkill.Name, id);
+                    matchingSkill.Level = newSkill.Level;
+                }
+                // Если навык новый, добавляем его
+                else
+                {
+                    _logger.LogInformation("Adding new skill '{Skill}' for person with id={Id}", 
+                                            newSkill.Name, id);
+                    existingPerson.Skills.Add(newSkill);
+                }
+            }
+
+            // Удаление навыков, которых больше нет в новом списке
+            foreach (var existingSkill in existingSkills)
+            {
+                if (!person.Skills.Any(s => s.Name == existingSkill.Name))
+                {
+                    _logger.LogInformation("Deleting skill '{Skill}' for person with id={Id}", 
+                                            existingSkill.Name, id);
+                    _context.Skills.Remove(existingSkill);
+                }
+            }
+
+            await _context.SaveChangesAsync();
             _logger.LogInformation("Successfully updated person with id={Id}", id);
             return NoContent();
         }
