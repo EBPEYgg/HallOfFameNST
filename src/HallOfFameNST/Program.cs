@@ -1,4 +1,5 @@
 using HallOfFameNST.Model.Data;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using NLog;
 using NLog.Web;
@@ -23,6 +24,28 @@ try
     var app = builder.Build();
 
     app.Logger.LogInformation("Starting the app");
+
+    app.UseExceptionHandler(errorApp =>
+    {
+        errorApp.Run(async context =>
+        {
+            var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+            var exceptionHandlerPathFeature = context.Features.Get<IExceptionHandlerPathFeature>();
+
+            context.Response.StatusCode = 500;
+            context.Response.ContentType = "application/json";
+
+            if (exceptionHandlerPathFeature?.Error is not null)
+            {
+                logger.LogError(exceptionHandlerPathFeature.Error, "Unhandled exception occurred.");
+
+                await context.Response.WriteAsync(System.Text.Json.JsonSerializer.Serialize(new
+                {
+                    error = "An unexpected error occurred. Please try again later."
+                }));
+            }
+        });
+    });
 
     // Configure the HTTP request pipeline.
     if (app.Environment.IsDevelopment())
