@@ -23,11 +23,11 @@ namespace HallOfFameNST.Tests.IntegrationTests
             var person1 = new Person { Name = "Alice Doe", DisplayName = "Alice" };
             var person2 = new Person { Name = "Bob Smith", DisplayName = "Bob" };
 
-            await _client.PostAsJsonAsync("api/v1/Person", person1);
-            await _client.PostAsJsonAsync("api/v1/Person", person2);
+            await _client.PostAsJsonAsync("api/v1/persons", person1);
+            await _client.PostAsJsonAsync("api/v1/persons", person2);
 
             // Act
-            var response = await _client.GetAsync("api/v1/Person");
+            var response = await _client.GetAsync("api/v1/persons");
             var persons = await response.Content.ReadFromJsonAsync<List<Person>>();
 
             // Assert
@@ -52,7 +52,7 @@ namespace HallOfFameNST.Tests.IntegrationTests
             (long personId, HttpStatusCode expected)
         {
             // Act
-            var response = await _client.GetAsync($"api/v1/Person/{personId}");
+            var response = await _client.GetAsync($"api/v1/persons/{personId}");
 
             // Assert
             response.StatusCode.Should().Be(expected);
@@ -63,13 +63,13 @@ namespace HallOfFameNST.Tests.IntegrationTests
         {
             // Arrange
             var newPerson = new Person { Name = "Jane Doe", DisplayName = "Jane" };
-            var createResponse = await _client.PostAsJsonAsync("api/v1/Person", newPerson);
+            var createResponse = await _client.PostAsJsonAsync("api/v1/persons", newPerson);
             createResponse.StatusCode.Should().Be(HttpStatusCode.Created);
             var createdPerson = await createResponse.Content.ReadFromJsonAsync<Person>();
             long personId = createdPerson.Id;
 
             // Act
-            var response = await _client.GetAsync($"api/v1/Person/{personId}");
+            var response = await _client.GetAsync($"api/v1/persons/{personId}");
             var person = await response.Content.ReadFromJsonAsync<Person>();
 
             // Assert
@@ -84,7 +84,7 @@ namespace HallOfFameNST.Tests.IntegrationTests
         public async Task GetAllPersons_ShouldReturnEmptyList_WhenNoPersonsExist()
         {
             // Act
-            var response = await _client.GetAsync("api/v1/Person");
+            var response = await _client.GetAsync("api/v1/persons");
             var result = await response.Content.ReadAsStringAsync();
 
             // Assert
@@ -99,10 +99,10 @@ namespace HallOfFameNST.Tests.IntegrationTests
             var newPerson = new Person { Name = "John Doe", DisplayName = "John" };
 
             // Act
-            var createResponse = await _client.PostAsJsonAsync("api/v1/Person", newPerson);
+            var createResponse = await _client.PostAsJsonAsync("api/v1/persons", newPerson);
             var createdPerson = await createResponse.Content.ReadFromJsonAsync<object>();
 
-            var response = await _client.GetAsync("api/v1/Person");
+            var response = await _client.GetAsync("api/v1/persons");
             var persons = await response.Content.ReadFromJsonAsync<List<Person>>();
 
             // Assert
@@ -119,7 +119,7 @@ namespace HallOfFameNST.Tests.IntegrationTests
             var invalidPerson = new Person { Name = "", DisplayName = "" };
 
             // Act
-            var response = await _client.PostAsJsonAsync("api/v1/Person", invalidPerson);
+            var response = await _client.PostAsJsonAsync("api/v1/persons", invalidPerson);
 
             // Assert
             response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -132,7 +132,7 @@ namespace HallOfFameNST.Tests.IntegrationTests
             var invalidPerson = new { DisplayName = "John" };
 
             // Act
-            var response = await _client.PostAsJsonAsync("api/v1/Person", invalidPerson);
+            var response = await _client.PostAsJsonAsync("api/v1/persons", invalidPerson);
 
             // Assert
             response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -147,7 +147,7 @@ namespace HallOfFameNST.Tests.IntegrationTests
             var invalidPerson = new { Name = "John Hick" };
 
             // Act
-            var response = await _client.PostAsJsonAsync("api/v1/Person", invalidPerson);
+            var response = await _client.PostAsJsonAsync("api/v1/persons", invalidPerson);
 
             // Assert
             response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -160,16 +160,16 @@ namespace HallOfFameNST.Tests.IntegrationTests
         {
             // Arrange
             var newPerson = new Person { Name = "Mike Doe", DisplayName = "Mike" };
-            var createResponse = await _client.PostAsJsonAsync("api/v1/Person", newPerson);
+            var createResponse = await _client.PostAsJsonAsync("api/v1/persons", newPerson);
             var createdPerson = await createResponse.Content.ReadFromJsonAsync<Person>();
             long personId = createdPerson.Id;
 
             var updatedPerson = new { Name = "Michael Doe", DisplayName = "Michael" };
 
             // Act
-            var response = await _client.PutAsJsonAsync($"api/v1/Person/{personId}", updatedPerson);
+            var response = await _client.PutAsJsonAsync($"api/v1/persons/{personId}", updatedPerson);
 
-            var checkResponse = await _client.GetAsync("api/v1/Person");
+            var checkResponse = await _client.GetAsync("api/v1/persons");
             var persons = await checkResponse.Content.ReadFromJsonAsync<List<Person>>();
 
             // Assert
@@ -188,9 +188,9 @@ namespace HallOfFameNST.Tests.IntegrationTests
             var updatedPerson = new Person { Name = "Mike Doe", DisplayName = "Mike" };
 
             // Act
-            var response = await _client.PutAsJsonAsync($"api/v1/Person/{personId}", updatedPerson);
+            var response = await _client.PutAsJsonAsync($"api/v1/persons/{personId}", updatedPerson);
 
-            var checkResponse = await _client.GetAsync("api/v1/Person");
+            var checkResponse = await _client.GetAsync("api/v1/persons");
             var persons = await checkResponse.Content.ReadFromJsonAsync<object>();
 
             // Assert
@@ -203,16 +203,16 @@ namespace HallOfFameNST.Tests.IntegrationTests
         {
             // Arrange
             var newPerson = new { Name = "Jane Doe", DisplayName = "Jane" };
-            var createResponse = await _client.PostAsJsonAsync("api/v1/Person", newPerson);
+            var createResponse = await _client.PostAsJsonAsync("api/v1/persons", newPerson);
             var createdPerson = await createResponse.Content.ReadFromJsonAsync<Person>();
             long personId = createdPerson.Id;
 
             var invalidUpdate = new { Name = "", DisplayName = "" };
 
             // Act
-            var response = await _client.PutAsJsonAsync($"api/v1/Person/{personId}", invalidUpdate);
+            var response = await _client.PutAsJsonAsync($"api/v1/persons/{personId}", invalidUpdate);
 
-            var checkResponse = await _client.GetAsync("api/v1/Person");
+            var checkResponse = await _client.GetAsync("api/v1/persons");
             var persons = await checkResponse.Content.ReadFromJsonAsync<List<Person>>();
 
             // Assert
@@ -226,12 +226,12 @@ namespace HallOfFameNST.Tests.IntegrationTests
         {
             // Arrange
             var newPerson = new Person { Name = "Sarah Doe", DisplayName = "Sarah" };
-            var createResponse = await _client.PostAsJsonAsync("api/v1/Person", newPerson);
+            var createResponse = await _client.PostAsJsonAsync("api/v1/persons", newPerson);
             var createdPerson = await createResponse.Content.ReadFromJsonAsync<Person>();
             long personId = createdPerson.Id;
 
             // Act
-            var response = await _client.DeleteAsync($"api/v1/Person/{personId}");
+            var response = await _client.DeleteAsync($"api/v1/persons/{personId}");
 
             // Assert
             response.StatusCode.Should().Be(HttpStatusCode.NoContent);
@@ -244,7 +244,7 @@ namespace HallOfFameNST.Tests.IntegrationTests
             long personId = 1;
 
             // Act
-            var response = await _client.DeleteAsync($"api/v1/Person/{personId}");
+            var response = await _client.DeleteAsync($"api/v1/persons/{personId}");
 
             // Assert
             response.StatusCode.Should().Be(HttpStatusCode.NotFound);
