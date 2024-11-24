@@ -6,7 +6,7 @@ using HallOfFameNST.Model.Data;
 namespace HallOfFameNST.Controllers
 {
     [ApiController]
-    [Route("api/v1/[controller]")]
+    [Route("api/v1/persons")]
     public class PersonController : Controller
     {
         private readonly ILogger<PersonController> _logger;
@@ -20,15 +20,15 @@ namespace HallOfFameNST.Controllers
             _logger = logger;
         }
 
-        // GET: /api/v1/persons
+        // GET: api/v1/persons
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Person>>> GetPersons()
         {
             _logger.LogInformation("Starting GetPersons endpoint");
             try
             {
-                var persons = await _context.Person.Include(p => p.Skills).ToListAsync();
-                _logger.LogInformation("Successfully retrieved {Count} persons", persons.Count);
+                var persons = await _context.Person.Include(p => p.Skills).ToArrayAsync();
+                _logger.LogInformation("Successfully retrieved {Count} persons", persons.Count());
                 return persons;
             }
             catch (Exception ex)
