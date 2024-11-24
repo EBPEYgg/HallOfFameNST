@@ -1,10 +1,9 @@
-﻿using FluentAssertions;
-using HallOfFameNST.Model.Classes;
+﻿using HallOfFameNST.Model.Classes;
 using HallOfFameNST.Model.Data;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 
-namespace HallOfFameNST.Tests.Model
+namespace HallOfFameNST.Tests.UnitTests
 {
     public class PersonSkillDatabaseTests
     {

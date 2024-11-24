@@ -1,5 +1,4 @@
 ﻿using HallOfFameNST.Model.Classes;
-using FluentAssertions;
 using HallOfFameNST.Controllers;
 using HallOfFameNST.Model.Data;
 using Microsoft.EntityFrameworkCore;
@@ -7,7 +6,7 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Microsoft.AspNetCore.Mvc;
 
-namespace HallOfFameNST.Tests.Controllers
+namespace HallOfFameNST.Tests.UnitTests
 {
     public class PersonControllerTests
     {
