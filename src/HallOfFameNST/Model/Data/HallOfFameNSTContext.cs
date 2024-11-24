@@ -11,7 +11,7 @@ namespace HallOfFameNST.Model.Data
 
         public HallOfFameNSTContext(DbContextOptions<HallOfFameNSTContext> options) : base(options)
         {
-            Database.EnsureCreated();
+
         }
     }
 }
