@@ -1,0 +1,22 @@
+services:
+  api:
+    image: halloffame-api:latest
+    build:
+      context: .
+      dockerfile: ./src/HallOfFameNST/Dockerfile
+    ports:
+      - "5000:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - MSSQL_SA_PASSWORD=StrongPassword123
+    depends_on:
+      - db
+
+  db:
+    container_name: sqlserver
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=StrongPassword123
+    ports:
+      - "1433:1433"

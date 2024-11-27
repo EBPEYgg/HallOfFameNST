@@ -19,7 +19,8 @@ try
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen();
     builder.Services.AddDbContext<HallOfFameNSTContext>
-        (options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+        (options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"),
+                                         sqlServerOptions => sqlServerOptions.EnableRetryOnFailure()));
 
     var app = builder.Build();
 
@@ -37,6 +38,20 @@ try
     app.UseHttpsRedirection();
     app.UseAuthorization();
     app.MapControllers();
+
+    using (var scope = app.Services.CreateScope())
+    {
+        var context = scope.ServiceProvider.GetRequiredService<HallOfFameNSTContext>();
+        try
+        {
+            context.Database.Migrate();
+        }
+        catch (Exception ex)
+        {
+            app.Logger.LogInformation($"Failed to apply migrations: {ex.Message}");
+        }
+    }
+
     app.Run();
 }
 catch (Exception ex)
