@@ -4,6 +4,11 @@ namespace HallOfFameNST.Middleware
 {
     public static class ExceptionHandlingMiddlewareExtensions
     {
+        /// <summary>
+        /// Метод, который добавляет Middleware для обработки 
+        /// всех необработанных глобальных исключений. <br/>
+        /// Клиенту возвращается JSON-ответ с сообщением об ошибке и кодом 500.
+        /// </summary>
         public static void ConfigureExceptionHandler(this WebApplication app)
         {
             app.UseExceptionHandler(errorApp =>

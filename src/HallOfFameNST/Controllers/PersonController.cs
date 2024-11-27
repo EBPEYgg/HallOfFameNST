@@ -21,6 +21,10 @@ namespace HallOfFameNST.Controllers
         }
 
         // GET: api/v1/persons
+        /// <summary>
+        /// Возвращает всех сотрудников.
+        /// </summary>
+        /// <returns>Массив объектов типа <see cref="Person"/>.</returns>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Person>>> GetPersons()
         {
@@ -39,6 +43,11 @@ namespace HallOfFameNST.Controllers
         }
 
         // GET: api/v1/persons/{id}
+        /// <summary>
+        /// Возвращает сотрудника с указанным id.
+        /// </summary>
+        /// <param name="id">Уникальный идентификатор сотрудника.</param>
+        /// <returns>Объект типа <see cref="Person"/>.</returns>
         [HttpGet("{id}")]
         public async Task<ActionResult<Person>> GetPerson(long id)
         {
@@ -59,6 +68,12 @@ namespace HallOfFameNST.Controllers
         }
 
         // POST: api/v1/persons
+        /// <summary>
+        /// Создает нового сотрудника в системе с указанными навыками.
+        /// </summary>
+        /// <param name="person">Сотрудник.</param>
+        /// <returns>Если успешно, то <see cref="StatusCodes.Status201Created"/><br/> 
+        /// Иначе <see cref="StatusCodes.Status400BadRequest"/>.</returns>
         [HttpPost]
         public async Task<ActionResult<Person>> CreatePerson(Person person)
         {
@@ -79,6 +94,14 @@ namespace HallOfFameNST.Controllers
         }
 
         // POST: api/v1/persons/{id}
+        /// <summary>
+        /// Обновляет данные сотрудника и его навыки согласно значениям.
+        /// </summary>
+        /// <param name="id">Уникальный идентификатор сотрудника.</param>
+        /// <param name="person">Сотрудник.</param>
+        /// <returns>Если успешно, то <see cref="StatusCodes.Status204NoContent"/>; <br/>
+        /// Если сотрудник не найден, то <see cref="StatusCodes.Status404NotFound"/>; <br/>
+        /// Иначе <see cref="StatusCodes.Status400BadRequest"/>.</returns>
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdatePerson(long id, Person person)
         {
@@ -142,6 +165,12 @@ namespace HallOfFameNST.Controllers
         }
 
         // POST: api/v1/persons/{id}
+        /// <summary>
+        /// Удаляет сотрудника с указанным id из системы.
+        /// </summary>
+        /// <param name="id">Уникальный идентификатор сотрудника.</param>
+        /// <returns>Если успешно, то <see cref="StatusCodes.Status204NoContent"/>; <br/>
+        /// Если сотрудник не найден, то <see cref="StatusCodes.Status404NotFound"/>.</returns>
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeletePerson(long id)
         {

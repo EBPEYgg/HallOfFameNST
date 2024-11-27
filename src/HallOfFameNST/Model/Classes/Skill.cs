@@ -2,6 +2,9 @@
 
 namespace HallOfFameNST.Model.Classes
 {
+    /// <summary>
+    /// Класс, описывающий навык сотрудника компании.
+    /// </summary>
     public class Skill
     {
         public long Id { get; set; }
