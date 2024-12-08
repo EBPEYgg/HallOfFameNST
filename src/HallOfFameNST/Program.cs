@@ -1,8 +1,12 @@
+using HallOfFameNST.Data;
 using HallOfFameNST.Middleware;
-using HallOfFameNST.Model.Data;
+using HallOfFameNST.Repository;
+using HallOfFameNST.Repository.Interfaces;
+using HallOfFameNST.Services.Interfaces;
+using HallOfFameNST.Services;
 using Microsoft.EntityFrameworkCore;
-using NLog;
 using NLog.Web;
+using NLog;
 
 var logger = LogManager.Setup().LoadConfigurationFromAppSettings().GetCurrentClassLogger();
 logger.Debug("Initializing application");
@@ -10,7 +14,6 @@ logger.Debug("Initializing application");
 try
 {
     var builder = WebApplication.CreateBuilder(args);
-
     builder.Logging.ClearProviders();
     builder.Host.UseNLog();
 
@@ -18,10 +21,12 @@ try
     builder.Services.AddControllers();
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen();
+    builder.Services.AddScoped(typeof(IPersonRepository), typeof(PersonRepository));
+    builder.Services.AddScoped<IPersonService, PersonService>();
     builder.Services.AddDbContext<HallOfFameNSTContext>
         (options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"),
                                          sqlServerOptions => sqlServerOptions.EnableRetryOnFailure()));
-
+    
     var app = builder.Build();
 
     app.Logger.LogInformation("Starting the app");

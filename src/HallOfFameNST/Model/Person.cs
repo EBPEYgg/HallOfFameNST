@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace HallOfFameNST.Model.Classes
+namespace HallOfFameNST.Model
 {
     /// <summary>
     /// Класс, описывающий сотрудника компании.

@@ -1,11 +1,11 @@
-﻿using HallOfFameNST.Model.Classes;
+﻿using HallOfFameNST.Model;
 using Microsoft.EntityFrameworkCore;
 
-namespace HallOfFameNST.Model.Data
+namespace HallOfFameNST.Data
 {
     public class HallOfFameNSTContext : DbContext
     {
-        public DbSet<Person> Person {  get; set; }
+        public DbSet<Person> Person { get; set; }
 
         public DbSet<Skill> Skills { get; set; }
 
