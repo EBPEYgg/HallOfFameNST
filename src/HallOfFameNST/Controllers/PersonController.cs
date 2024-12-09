@@ -23,7 +23,9 @@ namespace HallOfFameNST.Controllers
         /// <summary>
         /// Возвращает всех сотрудников.
         /// </summary>
-        /// <returns>Массив объектов типа <see cref="Person"/>.</returns>
+        /// <returns>Если успешно, то массив объектов типа <see cref="Person"/>
+        /// и <see cref="StatusCodes.Status201Created"/>; <br/>
+        /// Иначе <see cref="Exception"/>.</returns>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<PersonDto>>> GetPersons()
         {
@@ -75,14 +77,25 @@ namespace HallOfFameNST.Controllers
         /// Создает нового сотрудника в системе с указанными навыками.
         /// </summary>
         /// <param name="person">Сотрудник.</param>
-        /// <returns>Если успешно, то <see cref="StatusCodes.Status201Created"/><br/> 
-        /// Иначе <see cref="StatusCodes.Status500InternalServerError"/>.</returns>
+        /// <returns>Если успешно, то <see cref="StatusCodes.Status201Created"/>; <br/> 
+        /// Если не пройдена валидация модели, то <see cref="StatusCodes.Status400BadRequest"/>; <br/>
+        /// Иначе <see cref="Exception"/>.</returns>
         [HttpPost]
         public async Task<ActionResult<PersonDto>> CreatePerson(PersonDto personDto)
         {
             _logger.LogInformation("Starting CreatePerson endpoint");
             try
             {
+                if (!ModelState.IsValid)
+                {
+                    _logger.LogWarning("Invalid model state while creating a person " +
+                                       "with id={id}. Errors: {Errors}",
+                                        personDto.Id, 
+                                        ModelState.Values.SelectMany(v => v.Errors)
+                                                         .Select(e => e.ErrorMessage));
+                    return BadRequest(ModelState);
+                }
+
                 var createdPerson = await _personService.CreatePersonAsync(personDto);
                 _logger.LogInformation("Successful created a person with id={id}", createdPerson.Id);
                 return CreatedAtAction(nameof(GetPerson), new { id = createdPerson.Id }, createdPerson);
@@ -101,13 +114,24 @@ namespace HallOfFameNST.Controllers
         /// <param name="person">Сотрудник.</param>
         /// <returns>Если успешно, то <see cref="StatusCodes.Status204NoContent"/>; <br/>
         /// Если сотрудник не найден, то <see cref="StatusCodes.Status404NotFound"/>; <br/>
-        /// Иначе <see cref="StatusCodes.Status500InternalServerError"/>.</returns>
+        /// Если не пройдена валидация модели, то <see cref="StatusCodes.Status400BadRequest"/>; <br/>
+        /// Иначе <see cref="Exception"/>.</returns>
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdatePerson(long id, PersonDto personDto)
         {
             _logger.LogInformation("Starting UpdatePerson endpoint for id={Id}", id);
             try
             {
+                if (!ModelState.IsValid)
+                {
+                    _logger.LogWarning("Invalid model state while updating person " +
+                                       "with id={Id}. Errors: {Errors}",
+                                       id, 
+                                       ModelState.Values.SelectMany(v => v.Errors)
+                                                        .Select(e => e.ErrorMessage));
+                    return BadRequest(ModelState);
+                }
+
                 await _personService.UpdatePersonAsync(id, personDto);
                 _logger.LogInformation("Successfully updated person with id={Id}", id);
                 return NoContent();
@@ -131,7 +155,7 @@ namespace HallOfFameNST.Controllers
         /// <param name="id">Уникальный идентификатор сотрудника.</param>
         /// <returns>Если успешно, то <see cref="StatusCodes.Status204NoContent"/>; <br/>
         /// Если сотрудник не найден, то <see cref="StatusCodes.Status404NotFound"/>; <br/>
-        /// Иначе <see cref="StatusCodes.Status500InternalServerError"/>.</returns>
+        /// Иначе <see cref="Exception"/>.</returns>
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeletePerson(long id)
         {
