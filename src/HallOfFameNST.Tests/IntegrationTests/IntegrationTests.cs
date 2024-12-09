@@ -1,6 +1,6 @@
-﻿using System.Net;
+﻿using HallOfFameNST.DTO;
 using System.Net.Http.Json;
-using HallOfFameNST.Model.Classes;
+using System.Net;
 
 namespace HallOfFameNST.Tests.IntegrationTests
 {
@@ -20,15 +20,15 @@ namespace HallOfFameNST.Tests.IntegrationTests
         public async Task GetPersons_ShouldReturnListOfPersons_WhenPersonsExists()
         {
             // Arrange
-            var person1 = new Person { Name = "Alice Doe", DisplayName = "Alice" };
-            var person2 = new Person { Name = "Bob Smith", DisplayName = "Bob" };
+            var person1 = new PersonDto { Name = "Alice Doe", DisplayName = "Alice" };
+            var person2 = new PersonDto { Name = "Bob Smith", DisplayName = "Bob" };
 
             await _client.PostAsJsonAsync("api/v1/persons", person1);
             await _client.PostAsJsonAsync("api/v1/persons", person2);
 
             // Act
             var response = await _client.GetAsync("api/v1/persons");
-            var persons = await response.Content.ReadFromJsonAsync<List<Person>>();
+            var persons = await response.Content.ReadFromJsonAsync<List<PersonDto>>();
 
             // Assert
             response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -62,15 +62,15 @@ namespace HallOfFameNST.Tests.IntegrationTests
         public async Task GetPersonById_ShouldReturnPerson_WhenPersonExists()
         {
             // Arrange
-            var newPerson = new Person { Name = "Jane Doe", DisplayName = "Jane" };
+            var newPerson = new PersonDto { Name = "Jane Doe", DisplayName = "Jane" };
             var createResponse = await _client.PostAsJsonAsync("api/v1/persons", newPerson);
             createResponse.StatusCode.Should().Be(HttpStatusCode.Created);
-            var createdPerson = await createResponse.Content.ReadFromJsonAsync<Person>();
+            var createdPerson = await createResponse.Content.ReadFromJsonAsync<PersonDto>();
             long personId = createdPerson.Id;
 
             // Act
             var response = await _client.GetAsync($"api/v1/persons/{personId}");
-            var person = await response.Content.ReadFromJsonAsync<Person>();
+            var person = await response.Content.ReadFromJsonAsync<PersonDto>();
 
             // Assert
             response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -96,14 +96,14 @@ namespace HallOfFameNST.Tests.IntegrationTests
         public async Task CreatePerson_ShouldReturnCreated_WhenValidDataProvided()
         {
             // Arrange
-            var newPerson = new Person { Name = "John Doe", DisplayName = "John" };
+            var newPerson = new PersonDto { Name = "John Doe", DisplayName = "John" };
 
             // Act
             var createResponse = await _client.PostAsJsonAsync("api/v1/persons", newPerson);
             var createdPerson = await createResponse.Content.ReadFromJsonAsync<object>();
 
             var response = await _client.GetAsync("api/v1/persons");
-            var persons = await response.Content.ReadFromJsonAsync<List<Person>>();
+            var persons = await response.Content.ReadFromJsonAsync<List<PersonDto>>();
 
             // Assert
             createResponse.StatusCode.Should().Be(HttpStatusCode.Created);
@@ -116,7 +116,7 @@ namespace HallOfFameNST.Tests.IntegrationTests
         public async Task CreatePerson_ShouldReturnBadRequest_WhenDataIsInvalid()
         {
             // Arrange
-            var invalidPerson = new Person { Name = "", DisplayName = "" };
+            var invalidPerson = new PersonDto { Name = "", DisplayName = "" };
 
             // Act
             var response = await _client.PostAsJsonAsync("api/v1/persons", invalidPerson);
@@ -129,7 +129,7 @@ namespace HallOfFameNST.Tests.IntegrationTests
         public async Task CreatePerson_ShouldReturnBadRequest_WhenNameIsMissing()
         {
             // Arrange
-            var invalidPerson = new { DisplayName = "John" };
+            var invalidPerson = new PersonDto { DisplayName = "John" };
 
             // Act
             var response = await _client.PostAsJsonAsync("api/v1/persons", invalidPerson);
@@ -144,7 +144,7 @@ namespace HallOfFameNST.Tests.IntegrationTests
         public async Task CreatePerson_ShouldReturnBadRequest_WhenDisplayNameIsMissing()
         {
             // Arrange
-            var invalidPerson = new { Name = "John Hick" };
+            var invalidPerson = new PersonDto { Name = "John Hick" };
 
             // Act
             var response = await _client.PostAsJsonAsync("api/v1/persons", invalidPerson);
@@ -159,18 +159,17 @@ namespace HallOfFameNST.Tests.IntegrationTests
         public async Task UpdatePerson_ShouldReturnNoContent_WhenPersonExist()
         {
             // Arrange
-            var newPerson = new Person { Name = "Mike Doe", DisplayName = "Mike" };
+            var newPerson = new PersonDto { Name = "Mike Doe", DisplayName = "Mike" };
             var createResponse = await _client.PostAsJsonAsync("api/v1/persons", newPerson);
-            var createdPerson = await createResponse.Content.ReadFromJsonAsync<Person>();
+            var createdPerson = await createResponse.Content.ReadFromJsonAsync<PersonDto>();
             long personId = createdPerson.Id;
 
             var updatedPerson = new { Name = "Michael Doe", DisplayName = "Michael" };
 
             // Act
             var response = await _client.PutAsJsonAsync($"api/v1/persons/{personId}", updatedPerson);
-
             var checkResponse = await _client.GetAsync("api/v1/persons");
-            var persons = await checkResponse.Content.ReadFromJsonAsync<List<Person>>();
+            var persons = await checkResponse.Content.ReadFromJsonAsync<List<PersonDto>>();
 
             // Assert
             response.StatusCode.Should().Be(HttpStatusCode.NoContent);
@@ -185,7 +184,7 @@ namespace HallOfFameNST.Tests.IntegrationTests
         {
             // Arrange
             long personId = 1;
-            var updatedPerson = new Person { Name = "Mike Doe", DisplayName = "Mike" };
+            var updatedPerson = new PersonDto { Name = "Mike Doe", DisplayName = "Mike" };
 
             // Act
             var response = await _client.PutAsJsonAsync($"api/v1/persons/{personId}", updatedPerson);
@@ -204,7 +203,7 @@ namespace HallOfFameNST.Tests.IntegrationTests
             // Arrange
             var newPerson = new { Name = "Jane Doe", DisplayName = "Jane" };
             var createResponse = await _client.PostAsJsonAsync("api/v1/persons", newPerson);
-            var createdPerson = await createResponse.Content.ReadFromJsonAsync<Person>();
+            var createdPerson = await createResponse.Content.ReadFromJsonAsync<PersonDto>();
             long personId = createdPerson.Id;
 
             var invalidUpdate = new { Name = "", DisplayName = "" };
@@ -213,7 +212,7 @@ namespace HallOfFameNST.Tests.IntegrationTests
             var response = await _client.PutAsJsonAsync($"api/v1/persons/{personId}", invalidUpdate);
 
             var checkResponse = await _client.GetAsync("api/v1/persons");
-            var persons = await checkResponse.Content.ReadFromJsonAsync<List<Person>>();
+            var persons = await checkResponse.Content.ReadFromJsonAsync<List<PersonDto>>();
 
             // Assert
             response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -225,9 +224,9 @@ namespace HallOfFameNST.Tests.IntegrationTests
         public async Task DeletePerson_ShouldReturnNoContent_WhenPersonExists()
         {
             // Arrange
-            var newPerson = new Person { Name = "Sarah Doe", DisplayName = "Sarah" };
+            var newPerson = new PersonDto { Name = "Sarah Doe", DisplayName = "Sarah" };
             var createResponse = await _client.PostAsJsonAsync("api/v1/persons", newPerson);
-            var createdPerson = await createResponse.Content.ReadFromJsonAsync<Person>();
+            var createdPerson = await createResponse.Content.ReadFromJsonAsync<PersonDto>();
             long personId = createdPerson.Id;
 
             // Act

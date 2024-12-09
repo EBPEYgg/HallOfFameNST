@@ -1,7 +1,6 @@
-﻿using HallOfFameNST.Model.Classes;
-using HallOfFameNST.Model.Data;
+﻿using HallOfFameNST.Data;
+using HallOfFameNST.Model;
 using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.DataAnnotations;
 
 namespace HallOfFameNST.Tests.UnitTests
 {
@@ -79,60 +78,6 @@ namespace HallOfFameNST.Tests.UnitTests
             var savedSkill = await context.Skills.FirstOrDefaultAsync(s => s.Name == "Python");
             savedSkill.Should().NotBeNull();
             savedSkill.PersonId.Should().Be(person.Id);
-        }
-
-        [Fact]
-        public async Task AddPerson_ShouldFailValidation_WhenNameIsEmpty_ManualValidation()
-        {
-            // Arrange
-            var options = new DbContextOptionsBuilder<HallOfFameNSTContext>()
-                .UseInMemoryDatabase("InvalidPersonTest")
-                .Options;
-
-            using var context = new HallOfFameNSTContext(options);
-            var invalidPerson = new Person { DisplayName = "JD" };
-
-            // Act
-            Func<Task> act = async () =>
-            {
-                // ручная валидация данных, т.к. InMemoryDatabase игнорирует ограничения модели
-                var validationContext = new ValidationContext(invalidPerson);
-                Validator.ValidateObject(invalidPerson, validationContext, validateAllProperties: true);
-                await context.Person.AddAsync(invalidPerson);
-                await context.SaveChangesAsync();
-            };
-
-            // Assert
-            await act.Should().ThrowAsync<ValidationException>();
-        }
-
-        [Fact]
-        public async Task AddSkill_ShouldFailValidation_WhenLevelIsInvalid_ManualValidation()
-        {
-            // Arrange
-            var options = new DbContextOptionsBuilder<HallOfFameNSTContext>()
-                .UseInMemoryDatabase("InvalidSkillTest")
-                .Options;
-
-            using var context = new HallOfFameNSTContext(options);
-            var person = new Person { Name = "John Doe", DisplayName = "JD" };
-            await context.Person.AddAsync(person);
-            await context.SaveChangesAsync();
-
-            var invalidSkill = new Skill { Name = "C#", Level = 11, PersonId = person.Id };
-
-            // Act
-            Func<Task> act = async () =>
-            {
-                // ручная валидация данных, т.к. InMemoryDatabase игнорирует ограничения модели
-                var validationContext = new ValidationContext(invalidSkill);
-                Validator.ValidateObject(invalidSkill, validationContext, validateAllProperties: true);
-                await context.Skills.AddAsync(invalidSkill);
-                await context.SaveChangesAsync();
-            };
-
-            // Assert
-            await act.Should().ThrowAsync<ValidationException>();
         }
 
         [Fact]
