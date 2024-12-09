@@ -67,7 +67,18 @@ namespace HallOfFameNST.Services
             };
 
             await _repository.AddAsync(person);
-            return personDto;
+
+            return new PersonDto
+            {
+                Id = person.Id,
+                Name = person.Name,
+                DisplayName = person.DisplayName,
+                Skills = person.Skills.Select(skill => new SkillDto
+                {
+                    Name = skill.Name,
+                    Level = skill.Level
+                }).ToArray()
+            };
         }
 
         public async Task UpdatePersonAsync(long id, PersonDto personDto)
