@@ -6,16 +6,22 @@ namespace HallOfFameNST.Tests.UnitTests
 {
     public class PersonSkillDatabaseTests
     {
+        private DbContextOptions<HallOfFameNSTContext> _options;
+
+        public PersonSkillDatabaseTests()
+        {
+            _options = new DbContextOptionsBuilder<HallOfFameNSTContext>()
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .Options;
+        }
+
         [Fact]
         public void DatabaseContext_ShouldCreateTablesForModels()
         {
             // Arrange
-            var options = new DbContextOptionsBuilder<HallOfFameNSTContext>()
-                .UseInMemoryDatabase("TestDb")
-                .Options;
 
             // Act
-            using var context = new HallOfFameNSTContext(options);
+            using var context = new HallOfFameNSTContext(_options);
 
             // Assert
             context.Database.EnsureCreated();
@@ -27,11 +33,8 @@ namespace HallOfFameNST.Tests.UnitTests
         public async Task AddPerson_ShouldSaveToDatabase()
         {
             // Arrange
-            var options = new DbContextOptionsBuilder<HallOfFameNSTContext>()
-                .UseInMemoryDatabase("AddPersonTest")
-                .Options;
+            using var context = new HallOfFameNSTContext(_options);
 
-            using var context = new HallOfFameNSTContext(options);
             var person = new Person
             {
                 Name = "John Doe",
@@ -59,11 +62,8 @@ namespace HallOfFameNST.Tests.UnitTests
         public async Task AddSkill_ShouldLinkToPerson()
         {
             // Arrange
-            var options = new DbContextOptionsBuilder<HallOfFameNSTContext>()
-                .UseInMemoryDatabase("AddSkillTest")
-                .Options;
+            using var context = new HallOfFameNSTContext(_options);
 
-            using var context = new HallOfFameNSTContext(options);
             var person = new Person { Name = "Jane Doe", DisplayName = "JD" };
             await context.Person.AddAsync(person);
             await context.SaveChangesAsync();
@@ -84,11 +84,8 @@ namespace HallOfFameNST.Tests.UnitTests
         public async Task DeletePerson_ShouldRemoveAssociatedSkills()
         {
             // Arrange
-            var options = new DbContextOptionsBuilder<HallOfFameNSTContext>()
-                .UseInMemoryDatabase("DeletePersonTest")
-                .Options;
+            using var context = new HallOfFameNSTContext(_options);
 
-            using var context = new HallOfFameNSTContext(options);
             var person = new Person
             {
                 Name = "Jane Doe",
