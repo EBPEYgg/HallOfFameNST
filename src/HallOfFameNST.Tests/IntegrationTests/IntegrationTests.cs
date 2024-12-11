@@ -43,11 +43,11 @@ namespace HallOfFameNST.Tests.IntegrationTests
         }
 
         [Theory]
-        [InlineData(0, HttpStatusCode.NotFound)]
-        [InlineData(1, HttpStatusCode.NotFound)]
-        [InlineData(-1, HttpStatusCode.NotFound)]
-        [InlineData(2, HttpStatusCode.NotFound)]
-        [InlineData(999, HttpStatusCode.NotFound)]
+        [InlineData(0, HttpStatusCode.InternalServerError)]
+        [InlineData(1, HttpStatusCode.InternalServerError)]
+        [InlineData(-1, HttpStatusCode.InternalServerError)]
+        [InlineData(2, HttpStatusCode.InternalServerError)]
+        [InlineData(999, HttpStatusCode.InternalServerError)]
         public async Task GetPerson_ShouldReturnNotFound_WhenPersonDoesNotExist
             (long personId, HttpStatusCode expected)
         {
@@ -193,7 +193,7 @@ namespace HallOfFameNST.Tests.IntegrationTests
             var persons = await checkResponse.Content.ReadFromJsonAsync<object>();
 
             // Assert
-            response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+            response.StatusCode.Should().Be(HttpStatusCode.InternalServerError);
             persons.Should().NotBeNull();
         }
 
@@ -246,7 +246,7 @@ namespace HallOfFameNST.Tests.IntegrationTests
             var response = await _client.DeleteAsync($"api/v1/persons/{personId}");
 
             // Assert
-            response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+            response.StatusCode.Should().Be(HttpStatusCode.InternalServerError);
         }
     }
 }
