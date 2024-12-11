@@ -25,16 +25,9 @@ namespace HallOfFameNST.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<PersonDto>>> GetPersons()
         {
-            try
-            {
                 var persons = await _personService.GetPersonsAsync();
                 return Ok(persons);
             }
-            catch (Exception ex)
-            {
-                throw;
-            }
-        }
 
         /// <summary>
         /// Возвращает сотрудника с указанным id.
@@ -47,20 +40,9 @@ namespace HallOfFameNST.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<PersonDto>> GetPerson(long id)
         {
-            try
-            {
                 var person = await _personService.GetPersonByIdAsync(id);
                 return Ok(person);
             }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound();
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
-        }
 
         /// <summary>
         /// Создает нового сотрудника в системе с указанными навыками.
@@ -72,8 +54,6 @@ namespace HallOfFameNST.Controllers
         [HttpPost]
         public async Task<ActionResult<PersonDto>> CreatePerson(PersonDto personDto)
         {
-            try
-            {
                 if (!ModelState.IsValid)
                 {
                     return BadRequest(ModelState);
@@ -82,11 +62,6 @@ namespace HallOfFameNST.Controllers
                 var createdPerson = await _personService.CreatePersonAsync(personDto);
                 return CreatedAtAction(nameof(GetPerson), new { id = createdPerson.Id }, createdPerson);
             }
-            catch (Exception ex)
-            {
-                throw;
-            }
-        }
 
         /// <summary>
         /// Обновляет данные сотрудника и его навыки согласно значениям.
@@ -100,8 +75,6 @@ namespace HallOfFameNST.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdatePerson(long id, PersonDto personDto)
         {
-            try
-            {
                 if (!ModelState.IsValid)
                 {
                     return BadRequest(ModelState);
@@ -110,15 +83,6 @@ namespace HallOfFameNST.Controllers
                 await _personService.UpdatePersonAsync(id, personDto);
                 return NoContent();
             }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound();
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
-        }
 
         /// <summary>
         /// Удаляет сотрудника с указанным id из системы.
@@ -130,19 +94,8 @@ namespace HallOfFameNST.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeletePerson(long id)
         {
-            try
-            {
                 await _personService.DeletePersonAsync(id);
                 return NoContent();
             }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound();
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
-        }
     }
 }
