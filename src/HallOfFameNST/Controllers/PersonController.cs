@@ -1,7 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using HallOfFameNST.DTO;
+using HallOfFameNST.Services;
 using HallOfFameNST.Services.Interfaces;
-using HallOfFameNST.DTO;
-using HallOfFameNST.Model;
+using Microsoft.AspNetCore.Mvc;
 
 namespace HallOfFameNST.Controllers
 {
@@ -19,85 +19,68 @@ namespace HallOfFameNST.Controllers
         /// <summary>
         /// Возвращает всех сотрудников.
         /// </summary>
-        /// <returns>Если успешно, то массив объектов типа <see cref="Person"/>
-        /// и <see cref="StatusCodes.Status201Created"/>; <br/>
-        /// Иначе <see cref="Exception"/>.</returns>
+        /// <returns>Массив объектов типа <see cref="PersonDto"/>
+        /// и <see cref="StatusCodes.Status201Created"/>.</returns>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<PersonDto>>> GetPersons()
         {
-                var persons = await _personService.GetPersonsAsync();
-                return Ok(persons);
-            }
+            var persons = await _personService.GetPersonsAsync();
+            return Ok(persons);
+        }
 
         /// <summary>
         /// Возвращает сотрудника с указанным id.
         /// </summary>
         /// <param name="id">Уникальный идентификатор сотрудника.</param>
-        /// <returns>Если успешно, то объект типа <see cref="Person"/>
-        /// и <see cref="StatusCodes.Status200OK"/>;<br/>
-        /// Если сотрудник не найден, то <see cref="StatusCodes.Status404NotFound"/>;<br/>
-        /// Иначе <see cref="Exception"/>.</returns>
+        /// <returns><see cref="OkObjectResult"/> 
+        /// с объектом типа <see cref="PersonDto"/>.</returns>
         [HttpGet("{id}")]
         public async Task<ActionResult<PersonDto>> GetPerson(long id)
         {
-                var person = await _personService.GetPersonByIdAsync(id);
-                return Ok(person);
-            }
+            var person = await _personService.GetPersonByIdAsync(id);
+            return Ok(person);
+        }
 
         /// <summary>
         /// Создает нового сотрудника в системе с указанными навыками.
         /// </summary>
-        /// <param name="person">Сотрудник.</param>
-        /// <returns>Если успешно, то <see cref="StatusCodes.Status201Created"/>; <br/> 
-        /// Если не пройдена валидация модели, то <see cref="StatusCodes.Status400BadRequest"/>; <br/>
-        /// Иначе <see cref="Exception"/>.</returns>
+        /// <param name="personDto">Сотрудник.</param>
+        /// <returns><see cref="CreatedAtActionResult"/>
+        /// с объектом типа <see cref="PersonDto"/>.</returns>
         [HttpPost]
         [ServiceFilter(typeof(ValidateModelAttribute))]
         public async Task<ActionResult<PersonDto>> CreatePerson(PersonDto personDto)
         {
-                if (!ModelState.IsValid)
-                {
-                    return BadRequest(ModelState);
-                }
-
-                var createdPerson = await _personService.CreatePersonAsync(personDto);
-                return CreatedAtAction(nameof(GetPerson), new { id = createdPerson.Id }, createdPerson);
-            }
+            var createdPerson = await _personService.CreatePersonAsync(personDto);
+            return CreatedAtAction(nameof(GetPerson), new { id = createdPerson.Id }, createdPerson);
+        }
 
         /// <summary>
         /// Обновляет данные сотрудника и его навыки согласно значениям.
         /// </summary>
         /// <param name="id">Уникальный идентификатор сотрудника.</param>
-        /// <param name="person">Сотрудник.</param>
-        /// <returns>Если успешно, то <see cref="StatusCodes.Status204NoContent"/>; <br/>
-        /// Если сотрудник не найден, то <see cref="StatusCodes.Status404NotFound"/>; <br/>
-        /// Если не пройдена валидация модели, то <see cref="StatusCodes.Status400BadRequest"/>; <br/>
-        /// Иначе <see cref="Exception"/>.</returns>
+        /// <param name="personDto">Сотрудник.</param>
+        /// <returns><see cref="NoContentResult"/> с 
+        /// <see cref="StatusCodes.Status204NoContent"/>.</returns>
         [HttpPut("{id}")]
         [ServiceFilter(typeof(ValidateModelAttribute))]
         public async Task<IActionResult> UpdatePerson(long id, PersonDto personDto)
         {
-                if (!ModelState.IsValid)
-                {
-                    return BadRequest(ModelState);
-                }
-
-                await _personService.UpdatePersonAsync(id, personDto);
-                return NoContent();
-            }
+            await _personService.UpdatePersonAsync(id, personDto);
+            return NoContent();
+        }
 
         /// <summary>
         /// Удаляет сотрудника с указанным id из системы.
         /// </summary>
         /// <param name="id">Уникальный идентификатор сотрудника.</param>
-        /// <returns>Если успешно, то <see cref="StatusCodes.Status204NoContent"/>; <br/>
-        /// Если сотрудник не найден, то <see cref="StatusCodes.Status404NotFound"/>; <br/>
-        /// Иначе <see cref="Exception"/>.</returns>
+        /// <returns><see cref="NoContentResult"/> с 
+        /// <see cref="StatusCodes.Status204NoContent"/>.</returns>
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeletePerson(long id)
         {
-                await _personService.DeletePersonAsync(id);
-                return NoContent();
-            }
+            await _personService.DeletePersonAsync(id);
+            return NoContent();
+        }
     }
 }
