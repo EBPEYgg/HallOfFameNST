@@ -21,7 +21,7 @@ try
     builder.Services.AddControllers();
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen();
-    builder.Services.AddScoped(typeof(IPersonRepository), typeof(PersonRepository));
+    builder.Services.AddScoped<IPersonRepository, PersonRepository>();
     builder.Services.AddScoped<IPersonService, PersonService>();
     builder.Services.AddScoped<ValidateModelAttribute>();
     builder.Services.AddDbContext<HallOfFameNSTContext>
