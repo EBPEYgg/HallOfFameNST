@@ -27,7 +27,8 @@ namespace HallOfFameNST.Middleware
 
                         await context.Response.WriteAsync(System.Text.Json.JsonSerializer.Serialize(new
                         {
-                            error = "An unexpected error occurred. Please try again later."
+                            error = "An unexpected error occurred. Please try again later.",
+                            details = exceptionHandlerPathFeature.Error.Message
                         }));
                     }
                 });
