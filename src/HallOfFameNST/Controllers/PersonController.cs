@@ -52,6 +52,7 @@ namespace HallOfFameNST.Controllers
         /// Если не пройдена валидация модели, то <see cref="StatusCodes.Status400BadRequest"/>; <br/>
         /// Иначе <see cref="Exception"/>.</returns>
         [HttpPost]
+        [ServiceFilter(typeof(ValidateModelAttribute))]
         public async Task<ActionResult<PersonDto>> CreatePerson(PersonDto personDto)
         {
                 if (!ModelState.IsValid)
@@ -73,6 +74,7 @@ namespace HallOfFameNST.Controllers
         /// Если не пройдена валидация модели, то <see cref="StatusCodes.Status400BadRequest"/>; <br/>
         /// Иначе <see cref="Exception"/>.</returns>
         [HttpPut("{id}")]
+        [ServiceFilter(typeof(ValidateModelAttribute))]
         public async Task<IActionResult> UpdatePerson(long id, PersonDto personDto)
         {
                 if (!ModelState.IsValid)

@@ -23,6 +23,7 @@ try
     builder.Services.AddSwaggerGen();
     builder.Services.AddScoped(typeof(IPersonRepository), typeof(PersonRepository));
     builder.Services.AddScoped<IPersonService, PersonService>();
+    builder.Services.AddScoped<ValidateModelAttribute>();
     builder.Services.AddDbContext<HallOfFameNSTContext>
         (options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"),
                                          sqlServerOptions => sqlServerOptions.EnableRetryOnFailure()));
@@ -53,7 +54,7 @@ try
         }
         catch (Exception ex)
         {
-            app.Logger.LogInformation($"Failed to apply migrations: {ex.Message}");
+            app.Logger.LogError($"Failed to apply migrations: {ex.Message}");
         }
     }
 
